@@ -19,16 +19,30 @@ def infer_rating(win, lose, draw): # レーティングの区間推定を行う
         return (lower, upper)
  
     def print_result(result, alpha_string): # 結果の出力
-        lower = -max_delta_rating if result[0] != result[0] else erorate(result[0])
-        upper = max_delta_rating if result[1] != result[1] else erorate(result[1])
-        print(f"R({alpha_string}): {lower:.2f}～{upper:.2f}, Range: {upper - lower:.2f}")
+        lowerrate = 0 if result[0] != result[0] else 100 * result[0]
+        lower = -np.inf if result[0] != result[0] else erorate(result[0])
+        upperrate = 100 if result[1] != result[1] else 100 * result[1]
+        upper = np.inf if result[1] != result[1] else erorate(result[1])
+        print(f"R({alpha_string}): {lower:+8.2f}({lowerrate:6.2f}%)～{upper:+8.2f}({upperrate:6.2f}%), Range: {upper - lower:8.2f}")
 
     match = win + lose
     print(f"有効試合数: {match}")
-    print(f"勝率: {100 * win / match:.2f}%, ⊿R: {erorate(win / match):.1f}, 引分率: {100 * draw / (draw + match):.2f}%")
+    winrate = np.nan if match == 0 else 100 * win / match
+    deltarate = np.nan if match == 0 else erorate(win / match)
+    drawrate = np.nan if (draw + match) == 0 else 100 * draw / (draw + match)
+    print(f"勝率: {winrate:.2f}%, ⊿R: {deltarate:+.2f}, 引分率: {drawrate:.2f}%")
+    print_result(clopper_pearson(win, match, 0.5), "50.0000%")
+    print_result(clopper_pearson(win, match, 0.75), "75.0000%")
+    print_result(clopper_pearson(win, match, 0.80), "80.0000%")
+    print_result(clopper_pearson(win, match, 0.90), "90.0000%")
     print_result(clopper_pearson(win, match, 0.95), "95.0000%")
+    print_result(clopper_pearson(win, match, 0.98), "98.0000%")
     print_result(clopper_pearson(win, match, 0.99), "99.0000%")
+    print_result(clopper_pearson(win, match, 0.998), "99.8000%")
     print_result(clopper_pearson(win, match, 0.999), "99.9000%")
+    print_result(clopper_pearson(win, match, 0.9998), "99.9800%")
+    print_result(clopper_pearson(win, match, 0.9999), "99.9900%")
+    print_result(clopper_pearson(win, match, 0.999998), "99.9998%")
     print_result(clopper_pearson(win, match, 0.999999), "99.9999%")
 
 infer_rating(int(args[1]), int(args[2]), int(args[3]))
